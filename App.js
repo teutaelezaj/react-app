@@ -1,20 +1,64 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+
+import FitnessScreen from './screens/FitnessScreen';
+import FinanceScreen from './screens/FinanceScreen';
+import HomeScreen from './screens/HomeScreen';
+import GeneralChatScreen from './screens/GeneralChatScreen';
+import HorrorscopeScreen from './screens/HorrorscopeScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import SettingsInfo from './screens/SettingsInfo';
+import TermsOfService from './screens/TermsOfService';
+import ChatRules from './screens/ChatRules';
+import LoadingScreen from './screens/LoadingScreen';
+
+import NutritionScreen from './screens/NutritionScreen';
+import DreamScreen from './screens/DreamScreen';
+import StoryScreen from './screens/StoryScreen';
+import MathScreen from './screens/MathScreen';
+import HistoryScreen from './screens/HistoryScreen';
+import SWEScreen from './screens/SWEScreen';
+
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Loading">
+      <Stack.Screen name="Loading" component={LoadingScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Welcome' }} />
+        <Stack.Screen name="GeneralChat" component={GeneralChatScreen} options={{ title: 'GeneralChat' }} />
+        <Stack.Screen name="Fitness" component={FitnessScreen} options={{ title: 'Fitness Tips' }} />
+        <Stack.Screen name="Finance" component={FinanceScreen} options={{ title: 'Establishing Wealth' }} />
+        {/* Add more Stack.Screen components for other categories */}
+        <Stack.Screen name="Horrorscope" component={HorrorscopeScreen} options={{ title: 'Horrorscopes' }} />
+        <Stack.Screen name="Nutrition" component={NutritionScreen} options={{ title: 'Nutrition' }} />
+        <Stack.Screen name="Dream" component={DreamScreen} options={{ title: 'Dream' }} />
+        <Stack.Screen name="Story" component={StoryScreen} options={{ title: 'Story' }} />
+        <Stack.Screen name="Math" component={MathScreen} options={{ title: 'Math' }} />
+        <Stack.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
+        <Stack.Screen name="SWE" component={SWEScreen} options={{ title: 'SWE' }} />
+
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+        <Stack.Screen name="SettingsInfo" component={SettingsInfo} options={{ title: 'SettingsInfo' }} />
+        <Stack.Screen name="TermsOfService" component={TermsOfService} options={{ title: 'TermsOfService' }} />
+        <Stack.Screen name="ChatRules" component={ChatRules} options={{ title: 'ChatRules' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
+
+
+
+
+
+
+
+
+
+
+
