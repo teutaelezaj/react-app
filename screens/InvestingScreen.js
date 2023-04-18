@@ -11,8 +11,8 @@ const API_URL = "https://api.openai.com/v1/completions";
 const windowWidth = Dimensions.get('window').width;
 
 
-export default function FinanceScreen() {
-  const [inputText, setInputText] = useState("Hey Nexus! The stock market is confusing to me. What exactly is the stock market?");
+export default function InvestingScreen() {
+  const [inputText, setInputText] = useState("Hey Nexus! Can you give me a lesson on investing? What is investing and how can I get started?");
   const [outputText, setOutputText] = useState("");
   const [botRole, setBotRole] = useState("");
   const [messages, setMessages] = useState([]);

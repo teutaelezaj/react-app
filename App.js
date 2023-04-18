@@ -20,6 +20,15 @@ import StoryScreen from './screens/StoryScreen';
 import MathScreen from './screens/MathScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import SWEScreen from './screens/SWEScreen';
+import DatingTipsScreen from './screens/DatingTipsScreen';
+import GiftScreen from './screens/GiftScreen';
+import FriendsScreen from './screens/FriendsScreen';
+import WealthScreen from './screens/WealthScreen';
+import InvestingScreen from './screens/InvestingScreen';
+import InterviewScreen from './screens/InterviewScreen';
+import CareerScreen from './screens/CareerScreen';
+import TechScreen from './screens/TechScreen';
+import WeightScreen from './screens/WeightScreen';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +49,15 @@ export default function App() {
         <Stack.Screen name="Math" component={MathScreen} options={{ title: 'Math' }} />
         <Stack.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
         <Stack.Screen name="SWE" component={SWEScreen} options={{ title: 'SWE' }} />
+        <Stack.Screen name="Dating" component={DatingTipsScreen} options={{ title: 'Dating' }} />
+        <Stack.Screen name="Gift" component={GiftScreen} options={{ title: 'Gift' }} />
+        <Stack.Screen name="Friends" component={FriendsScreen} options={{ title: 'Friends' }} />
+        <Stack.Screen name="Wealth" component={WealthScreen} options={{ title: 'Wealth' }} />
+        <Stack.Screen name="Investing" component={InvestingScreen} options={{ title: 'Investing' }} />
+        <Stack.Screen name="Interview" component={InterviewScreen} options={{ title: 'Interview' }} />
+        <Stack.Screen name="Career" component={CareerScreen} options={{ title: 'Career' }} />
+        <Stack.Screen name="Tech" component={TechScreen} options={{ title: 'Tech' }} />
+        <Stack.Screen name="Weight" component={WeightScreen} options={{ title: 'Weight' }} />
 
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
         <Stack.Screen name="SettingsInfo" component={SettingsInfo} options={{ title: 'SettingsInfo' }} />

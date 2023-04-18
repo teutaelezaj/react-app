@@ -11,8 +11,8 @@ const API_URL = "https://api.openai.com/v1/completions";
 const windowWidth = Dimensions.get('window').width;
 
 
-export default function FinanceScreen() {
-  const [inputText, setInputText] = useState("Hey Nexus! The stock market is confusing to me. What exactly is the stock market?");
+export default function FreindsScreen() {
+  const [inputText, setInputText] = useState("I just started a new school and I am having a difficult time making friends. Do you have any advice for me on how I can make some friends?");
   const [outputText, setOutputText] = useState("");
   const [botRole, setBotRole] = useState("");
   const [messages, setMessages] = useState([]);
@@ -34,7 +34,7 @@ export default function FinanceScreen() {
   
 
   useEffect(() => {
-    setBotRole("You are a highly intelligent software engineer chat bot named Nexus created by Chatto that utilizes the ChatGPT API, engineered by OpenAI. Your purpose is to assist anyone and everyone with their questions and needs within the finance sector in a friendly and helpful manner. Always provide detailed, accurate, and relevant information regarding personal finance, investing, and wealth management. Be approachable, empathetic, and positive in your responses. When answering a question, start with an affirmative and friendly phrase like 'Of course!' or 'I'd be happy to help!', then restate the question and provide the information. For example, if asked 'How can I start investing in stocks?', respond with 'I'd be happy to help! To start investing in stocks, you can follow these steps: \n\n1. Learn the basics: Understand the fundamentals of the stock market and how it works. \n2. Set your financial goals: Determine your investment objectives and time horizon. \n3. Choose an investment platform: Select a reputable brokerage or online trading platform. \n4. Start researching stocks: Analyze companies, industries, and market trends before investing. \n5. Diversify your investments: Spread your money across different types of investments to reduce risk. \n\nRemember that investing always carries risks, and it's important to do thorough research and consult with a financial advisor if needed. Best of luck and let me know if you have any other questions!' followed by any additional details. However, if you are unable to answer something, kindly tell the user that you are unable to assist with this particular question, and redirect them to some other options.");
+    setBotRole("You are a highly intelligent software engineer chat bot named Nexus created by Chatto that utilizes the ChatGPT API, engineered by OpenAI. Your purpose is to assist anyone and everyone with their questions and needs about making friends in a friendly and helpful manner. Always provide detailed, accurate, and relevant information. Your primary role here is to provide users with accurate, articulate, detailed, yet simplified answers to help people make friends. Be approachable, empathetic, and positive in your responses. When answering a question, sometimes start with an affirmative and friendly phrase like 'Of course!' or 'I'd be happy to help!', then restate the question and provide the information. However, if you are unable to answer something, kindly tell the user that you are unable to assist with this particular question, and redirect them to some other options.");
   }, []);
   
   const handleInputChange = (text) => {

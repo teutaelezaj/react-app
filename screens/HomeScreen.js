@@ -35,7 +35,7 @@ const suggestionsData = [
   {
     category: 'Relationship',
     emoji: '💞',
-    subcategories: ['Dating Tips', 'Marriage Advice', 'Friendships'],
+    subcategories: ['Dating', 'Gift Advice', 'Friendships'],
   },
   // Add more categories and subcategories here
   {
@@ -47,7 +47,7 @@ const suggestionsData = [
   {
     category: 'Career',
     emoji: '👔',
-    subcategories: ['Interview Help', 'Career Options', 'Benefits'],
+    subcategories: ['Interview Help', 'Career Options', 'Breaking Into Tech'],
   },
 
   {
@@ -67,7 +67,16 @@ const subcategoryScreens = {
   'Storyteller':'Story',
   'Math':'Math',
   'History':'History',
-  'Software Engineering':'SWE'
+  'Software Engineering':'SWE',
+  'Dating':'Dating',
+  'Gift Advice':'Gift',
+  'Friendships':'Friends',
+  'Building Wealth':'Wealth',
+  'Investing':'Investing',
+  'Interview Help':'Interview',
+  'Career Options':'Career',
+  'Breaking Into Tech':'Tech',
+  'Losing Weight':'Weight',
   // Add other subcategories and their corresponding screen names here
 
   //add the rest later
