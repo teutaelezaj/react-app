@@ -15,7 +15,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Dimensions } from "react-native";
 import { Animated } from "react-native";
 
-const OPENAI_API_KEY = "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";
+const OPENAI_API_KEY = "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";
 const API_URL = "https://api.openai.com/v1/completions";
 
 const windowWidth = Dimensions.get("window").width;

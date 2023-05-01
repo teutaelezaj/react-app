@@ -88,7 +88,7 @@ const SettingsScreen = () => {
             // style={styles.boxView}
             onPress={handleReviewButtonPress}
           >
-            <Text style={styles.option}>Like us,Rate us?</Text>
+            <Text style={styles.option}>Like Us? Rate Us!</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.dividerView} />

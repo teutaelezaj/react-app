@@ -104,70 +104,45 @@ export default function HomeScreen({ navigation, changes }) {
         .catch((error) => console.log(error));
     }, [])
   );
-  // useEffect(() => {
-  //   // Retrieve conversation history from AsyncStorage
-  //   AsyncStorage.getItem("conversationHistory")
-  //     .then((history) => {
-  //       // Parse conversation history string into an array of question-answer pairs
-  //       const pairs = history.split("\n");
 
-  //       // Extract only the first question
-  //       let firstQuestion = pairs.find((pair) => pair.startsWith("Human:"));
-  //       if (firstQuestion) {
-  //         firstQuestion = firstQuestion.replace("Human:", "").trim();
-  //         setQuestions([firstQuestion]);
-  //       }
-  //     })
-  //     .catch((error) => console.log(error));
-  // }, []);
 
-  const renderQuestion = ({ item }) => (
+  const renderQuestion = ({ item, index }) => (
     <TouchableOpacity
-      style={styles.boxView}
-      onPress={() => navigation.navigate("GeneralChat")}
+      style={[styles.categoryBox, { alignSelf: 'flex-start' }]} // Align the box to the left
+      onPress={() => {
+        if (questions[0] === item) {
+          navigation.navigate("GeneralChat"); // Navigate to GeneralChatScreen
+        }
+      }}
     >
-      <View style={{ height: "55%" }}>
-        <Text style={styles.boxTextStyle}>{item.substring(0, 60) + "..."}</Text>
-      </View>
-      <View
-        style={{
-          width: "90%",
-          height: "35%",
-          alignSelf: "center",
-          justifyContent: "space-between",
-          flexDirection: "row",
-        }}
-      >
+      <View style={{ width: '90%', alignItems: 'flex-start', flexDirection: 'column' }}>
         <Text
           style={[
-            styles.boxTextStyle,
+            styles.categoryText,
             {
-              color: "#B2ABAB",
-
-              fontWeight: "bold",
-              fontSize: 18,
+              fontWeight: 'bold',
+              fontSize: 16,
+              color: 'white',
+              marginBottom: 5, // Add marginBottom to create spacing between item name and "See your recent conversation"
             },
           ]}
+          numberOfLines={1}
         >
-          See your recent Conversation
+          {item} {/* Display the name of the category the user was chatting with */}
         </Text>
         <Text
           style={[
-            styles.boxTextStyle,
-            {
-              color: "#B2ABAB",
-
-              fontWeight: "bold",
-              fontSize: 45,
-              bottom: "5%",
-            },
+            styles.categoryText,
+            { fontSize: 14, color: "white", fontWeight: "normal", marginTop: 5 }, // Add marginTop to create spacing between item name and "See your recent conversation"
           ]}
         >
-          ••••
+          See your recent conversation
         </Text>
       </View>
     </TouchableOpacity>
   );
+  
+  
   const handleCategoryPress = (category) => {
     setSelectedCategory(selectedCategory === category ? null : category);
   };
@@ -205,43 +180,57 @@ export default function HomeScreen({ navigation, changes }) {
     });
   }, [navigation]);
 
+  const historyData = [];
+
   return (
     <View style={styles.container}>
       <Text style={styles.suggestionsText}>Meet Nexus</Text>
       <Text style={styles.subtitleText}>
-        Chat with Nexus, an AI chat bot designed by Chatto to assist you with
-        anything you need!
-      </Text>
-      <View
-        style={{
-          width: "95%",
-          height: "5%",
-          alignSelf: "center",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginBottom: 5,
-        }}
-      >
-        <Text style={styles.historyTextStyle}>My History</Text>
-        <Text
-          style={[styles.historyTextStyle, { fontSize: 15, color: "#B2ABAB" }]}
-        >
-          See All
-        </Text>
-      </View>
-      <View>
-        <FlatList
-          data={questions}
-          renderItem={renderQuestion}
-          keyExtractor={(item, index) => index.toString()}
-          horizontal
-          style={{
-            alignSelf: "center",
-            paddingHorizontal: "5%",
-          }}
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
+  Chat with Nexus, an AI chat bot designed by Chatto to assist you with
+  anything you need!
+</Text>
+<View style={{ height: 10 }} />
+<View
+  style={{
+    fontSize: 2,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 15, // Reduce marginBottom
+    alignSelf: "flex-start",
+    // marginLeft: 20,
+    marginTop: 20, // Add marginTop
+  }}
+>
+  <Text style={[styles.suggestionsText, { marginTop: 5, marginBottom: 0 }]}>Chat History</Text>
+  {/* <Text
+    style={[styles.historyTextStyle, { fontSize: 15, color: "#B2ABAB" }]}
+  >
+    See All
+  </Text> */}
+</View>
+
+
+
+      {questions.length > 0 ? (
+  <View>
+    <FlatList
+      data={questions}
+      renderItem={renderQuestion}
+      keyExtractor={(item, index) => index.toString()}
+      horizontal
+      style={{
+        alignSelf: "center",
+        paddingHorizontal: "5%",
+      }}
+      showsHorizontalScrollIndicator={false}
+    />
+  </View>
+) : (
+  <Text style={{ paddingHorizontal: '5%', fontSize: 16, color: '#7C7C7C' }}>
+    You currently have no chat histories. Chat away and have your history saved here!
+  </Text>
+)}
+
 
       <Text style={styles.suggestionsText}>Suggestions</Text>
 
@@ -315,10 +304,12 @@ export default function HomeScreen({ navigation, changes }) {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000000",
+    paddingTop: 20, // Add padding to move content down
   },
   mainContent: {
     flexGrow: 1,
@@ -359,7 +350,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 18,
-    color: "#8ecae6",
+    color: "lightgrey", 
     // marginBottom: 30,
     marginRight: 30,
     marginLeft: 20,
@@ -368,14 +359,15 @@ const styles = StyleSheet.create({
     fontSize: 29,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 10,
+    marginBottom: 15, // Reduce marginBottom
     alignSelf: "flex-start",
     marginLeft: 20,
-    // marginTop: 20,
+    marginTop: 20, // Add marginTop
   },
   categoriesScrollView: {
     flexDirection: "row",
     maxHeight: 60, // Adjust this value to set the height of the categoriesScrollView
+    marginBottom: 10, // Add marginBottom
   },
   subcategoriesScrollView: {
     flex: 1,
@@ -453,7 +445,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#B2ABAB",
+    // borderColor: "#B2ABAB",
     justifyContent: "space-between",
     backgroundColor: "#000000",
     paddingHorizontal: 20,
@@ -478,15 +470,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
-  subcategoriesContent: {
-    flexGrow: 1,
-  },
   subcategoriesWrapper: {
     alignItems: "center",
     justifyContent: "center",
   },
   subcategoriesContent: {
     flexGrow: 1,
-    justifyContent: "center",
+    paddingBottom: 5, // Reduce paddingBottom
+  },
+  historySection: {
+    marginTop: 20, // Add marginTop to create more spacing between Meet Nexus and My History
+  },
+
+  emptyHistoryText: {
+    fontSize: 16,
+    color: "#fff",
+    textAlign: "center",
+    marginTop: 10, // Add marginTop for the empty history message
+  },
+  categoryBox: {
+      width: '80%', // Set the width to 100%
+      height: 100, // Decrease the height to 60
+      borderRadius: 17,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: 10,
+      paddingHorizontal: 10, // Add some padding to the sides
+    backgroundColor: "#272521", // Set the background color to light grey
   },
 });
