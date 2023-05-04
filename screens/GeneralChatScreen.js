@@ -16,6 +16,7 @@ import { Dimensions } from "react-native";
 import { Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import Icon from 'react-native-vector-icons/FontAwesome';
 const OPENAI_API_KEY = "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";
 const API_URL = "https://api.openai.com/v1/completions";
 
@@ -28,7 +29,7 @@ export default function GeneralChatScreen() {
   const [outputText, setOutputText] = useState("");
   const [botRole, setBotRole] = useState("");
   const [messages, setMessages] = useState([]);
-  console.log("====================------------=======", messages);
+  // console.log("====================------------=======", messages);
   const [isBotTyping, setIsBotTyping] = useState(false);
   const [botTypingText, setBotTypingText] = useState("");
 
@@ -36,6 +37,9 @@ export default function GeneralChatScreen() {
   // const [botTypingHeight, setBotTypingHeight] = useState(0);
   const [isNewMessage, setIsNewMessage] = useState(true);
   const [inputAreaHeight, setInputAreaHeight] = useState(90);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  
 
   const scrollViewRef = useRef(null);
 
@@ -45,20 +49,27 @@ export default function GeneralChatScreen() {
   useFocusEffect(
     React.useCallback(() => {
       AsyncStorage.getItem("conversationHistory")
-        .then((history) => {
-          setMessages([history]);
-        })
-        .catch((error) => console.log(error));
+      .then((history) => {
+        if (history && history.trim().startsWith("[")) {
+          setMessages(JSON.parse(history));
+        } else {
+          setMessages([]);
+        }
+        setIsInitialized(true);
+      })
+      .catch((error) => console.log(error));
+    
+
     }, [])
   );
-  // useEffect(() => {
-  //   setBotRole(conversationHistory || "You are a highly intelligent software engineer chat bot named Nexus created by Chatto that utilizes the ChatGPT API, engineered by OpenAI. Your purpose is to assist anyone and everyone with their questions and needs in a friendly and helpful manner, but more so serve as a friend. Make sure to ask users about their days, what they are up to, what their goals are, and overall be a friend. Always provide detailed, accurate, and relevant information. Be approachable, empathetic, and positive in your responses. When answering a question, start with an affirmative and friendly phrase, then restate the question and provide the information. However, if you are unable to answer something, kindly tell the user ‘I don’t really feel like talking about this’ and then redirect the topic.");
-  // }, [conversationHistory]);
+
   useEffect(() => {
     setBotRole(
       "You are a highly intelligent software engineer chat bot named Nexus created by Chatto that utilizes the ChatGPT API, engineered by OpenAI. Your purpose is to assist anyone and everyone with their questions and needs in a friendly and helpful manner, but more so serve as a friend. Make sure to ask users about their days, what they are up to, what their goals are, and overall be a friend. Always provide detailed, accurate, and relevant information. Be approachable, empathetic, and positive in your responses. When answering a question, start with an affirmative and friendly phrase, then restate the question and provide the information. However, if you are unable to answer something, kindly tell the user ‘I don’t really feel like talking about this’ and then redirect the topic."
     );
   }, []);
+  
+  
   
 
   const handleInputChange = (text) => {
@@ -131,7 +142,7 @@ export default function GeneralChatScreen() {
 
         const typingInterval = setInterval(() => {
           if (typingIndex < botResponse.length) {
-            setBotTypingText((prevText) => prevText + botResponse[typingIndex]);
+            setBotTypingText((prevText) => prevText + (typingIndex > 0 ? botResponse[typingIndex] : botResponse[typingIndex].trim()));
             typingIndex++;
           } else {
             clearInterval(typingInterval);
@@ -143,7 +154,9 @@ export default function GeneralChatScreen() {
             ]);
 
             // Store conversation history in AsyncStorage
-            AsyncStorage.setItem("conversationHistory", conversationHistory);
+            // Store conversation history in AsyncStorage
+AsyncStorage.setItem("conversationHistory", JSON.stringify(messages.concat({ type: "bot", content: botResponse.trim() }))); // Update this line
+
             console.log(
               "Conversation history111111111111111111",
               conversationHistory
@@ -151,10 +164,6 @@ export default function GeneralChatScreen() {
           }
         }, 50);
 
-        // setMessages((prevMessages) => [
-        //   ...prevMessages,
-        //   { type: 'bot', content: '' },
-        // ]);
       } else {
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -182,13 +191,46 @@ export default function GeneralChatScreen() {
     setIsProcessing(false);
   };
 
+  const renderMessage = (message, index, showMessageContainer) => {
+    if (message.content === "") {
+      return null;
+    }
+    const isUser = message.type === "user";
+    const iconName = isUser ? "user" : "android";
+    const messageContainerStyle = isUser
+      ? styles.userMessageContainer
+      : styles.botMessageContainer;
+    const messageTextStyle = isUser ? styles.userMessageText : styles.botMessageText;
+  
+    return showMessageContainer ? (
+      <View key={index} style={messageContainerStyle}>
+        <Icon
+          name={iconName}
+          size={24}
+          color="#fff"
+          style={styles.messageIcon}
+        />
+        <Text
+          onLayout={(event) => {
+            if (isUser) {
+              setUserMessageHeight(event.nativeEvent.layout.height);
+            }
+          }}
+          style={messageTextStyle}
+        >
+          {message.content}
+        </Text>
+      </View>
+    ) : null;
+  };
+  
   return (
-<View style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-        style={{ flex: 1 }}
-      >
+    <View style={styles.container}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+            style={{ flex: 1 }}
+          >
         <ScrollView
           ref={scrollViewRef}
           onContentSizeChange={() =>
@@ -196,72 +238,58 @@ export default function GeneralChatScreen() {
           }
           style={styles.chatArea}
           contentContainerStyle={{
+            paddingTop: 10, // Add this line to set the padding top of the ScrollView
             paddingBottom: 100,
             flexGrow: 1,
             justifyContent: "flex-start",
           }}
         >
-          {messages.map((message, index) => (
-            <View
-              key={index}
-              style={
-                message.type === "user"
-                  ? styles.userMessageContainer
-                  : styles.botMessageContainer
-              }
-            >
-              <Text
-                onLayout={(event) => {
-                  if (message.type === "user") {
-                    setUserMessageHeight(event.nativeEvent.layout.height);
-                  }
-                }}
-                style={styles.messageText}
-              >
-                {message.content}
-              </Text>
-            </View>
-          ))}
-          {isBotTyping && (
-            <View style={styles.botMessageContainer}>
-              <Text style={styles.messageText}>{botTypingText}</Text>
-            </View>
-          )}
-        </ScrollView>
+{/* {messages.map((message, index) => renderMessage(message, index, true))} */}
+{isInitialized && messages.map((message, index) => renderMessage(message, index, true))}
+{isBotTyping && messages.length > 0 && (
+  renderMessage(
+    { type: "bot", content: botTypingText },
+    messages.length,
+    isBotTyping
+  )
+)}
 
-        <StatusBar style="auto" />
-        <View style={styles.inputArea}>
-          <TextInput
-            style={styles.input}
-            placeholder="Type your message here"
-            placeholderTextColor="#f5f5f5"
-            onChangeText={handleInputChange}
-            value={inputText}
-            multiline={true}
-            maxHeight={200}
-          />
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={handleClearText}
-          >
-            <Text style={styles.clearButtonText}>×</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleChatbotResponse}
-          >
-            <Text style={styles.buttonText}>Send</Text>
-          </TouchableOpacity>
+    
+        </ScrollView>
+    
+            <StatusBar style="auto" />
+            <View style={styles.inputArea}>
+              <TextInput
+                style={styles.input}
+                placeholder="Type your message here"
+                placeholderTextColor="#f5f5f5"
+                onChangeText={handleInputChange}
+                value={inputText}
+                multiline={true}
+                maxHeight={200}
+              />
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={handleClearText}
+              >
+                <Text style={styles.clearButtonText}>×</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleChatbotResponse}
+              >
+                <Text style={styles.buttonText}>Send</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  );
-}
+      );
+    }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000000",
+    backgroundColor: "black",
   },
   header: {
     backgroundColor: "#219ebc",
@@ -279,6 +307,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 0,
     paddingBottom: 90,
+    backgroundColor: "black", // Add this line to set the background color of the ScrollView
   },
   userMessageText: {
     fontSize: 18,
@@ -299,17 +328,29 @@ const styles = StyleSheet.create({
     minHeight: Dimensions.get("window").height / 8,
   },
   botMessageContainer: {
-    backgroundColor: "rgba(128, 0, 128, 0.8)",
+    backgroundColor: "rgba(128, 0, 128, 0.6)",
     alignSelf: "stretch",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 40,
+    paddingRight: 40,
     borderRadius: 10,
-  },  
+    marginVertical: 5,
+    // minHeight: 80,
+  },
   chatAreaContent: {
     padding: 10,
     flexGrow: 1,
     justifyContent: "flex-end",
   },
+  firstMessageContainer: {
+    alignSelf: "stretch",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    marginTop: 0, // Set the marginTop to 0 for the first message
+  },
+  
   inputArea: {
     flexDirection: "row",
     alignItems: "center",
@@ -400,7 +441,24 @@ const styles = StyleSheet.create({
   userMessageContainer: {
     backgroundColor: "black",
     alignSelf: "stretch",
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 40,
+    paddingRight: 40,
+    borderRadius: 10,
+    marginVertical: 5,
+    minHeight: 80,
+  },
+  historyMessageContainer: {
+    alignSelf: "stretch",
     paddingHorizontal: 10,
     paddingVertical: 5,
+    marginVertical: 5, // Add margin between messages
+    backgroundColor: "black", // Set the background color to black
   },
+  messageContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  
 });
