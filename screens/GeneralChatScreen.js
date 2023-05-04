@@ -22,7 +22,7 @@ const API_URL = "https://api.openai.com/v1/completions";
 
 const windowWidth = Dimensions.get("window").width;
 
-export default function GeneralChatScreen() {
+export default function GeneralChatScreen({ navigation, route }) {
   const [inputText, setInputText] = useState(
     "Hello there! What is your name? What do you do?"
   );
@@ -48,20 +48,35 @@ export default function GeneralChatScreen() {
   };
   useFocusEffect(
     React.useCallback(() => {
-      AsyncStorage.getItem("conversationHistory")
-      .then((history) => {
-        if (history && history.trim().startsWith("[")) {
+      const loadHistory = async () => {
+        const isNewChat = route.params?.isNewChat ?? true;
+        const history = await AsyncStorage.getItem("conversationHistory");
+  
+        if (!isNewChat && history && history.trim().startsWith("[")) {
           setMessages(JSON.parse(history));
         } else {
           setMessages([]);
         }
         setIsInitialized(true);
-      })
-      .catch((error) => console.log(error));
-    
-
+      };
+  
+      const unsubscribe = navigation.addListener("blur", () => {
+        // Clear the messages state when the screen is unfocused
+        setMessages([]);
+      });
+  
+      // Load the history when the screen is focused
+      loadHistory();
+  
+      return () => {
+        // Remove the listener when the component is unmounted
+        unsubscribe();
+      };
     }, [])
   );
+  
+  
+  
 
   useEffect(() => {
     setBotRole(

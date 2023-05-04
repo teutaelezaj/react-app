@@ -89,32 +89,30 @@ export default function HomeScreen({ navigation, changes }) {
   // console.log("Message", questions);
   useFocusEffect(
     React.useCallback(() => {
-      AsyncStorage.getItem("conversationHistory")
-        .then((history) => {
-          // Parse conversation history string into an array of question-answer pairs
-          const pairs = history.split("\n");
-          // console.log("Conversation history========", history);
-          // Extract only the first question
-          let firstQuestion = pairs.find((pair) => pair.startsWith("Human:"));
-          if (firstQuestion) {
-            firstQuestion = firstQuestion.replace("Human:", "").trim();
-            setQuestions([firstQuestion]);
-          }
-        })
-        .catch((error) => console.log(error));
+      const loadHistory = async () => {
+        const history = await AsyncStorage.getItem("conversationHistory");
+        if (history && history.trim().startsWith("[")) {
+          const historyArray = JSON.parse(history);
+          setQuestions(historyArray.map((item) => item.question));
+        } else {
+          setQuestions([]);
+        }
+      };
+  
+      loadHistory();
     }, [])
   );
 
 
   const renderQuestion = ({ item, index }) => (
-    <TouchableOpacity
-      style={[styles.categoryBox, { alignSelf: 'flex-start' }]} // Align the box to the left
-      onPress={() => {
-        if (questions[0] === item) {
-          navigation.navigate("GeneralChat"); // Navigate to GeneralChatScreen
-        }
-      }}
-    >
+<TouchableOpacity
+  style={[styles.categoryBox, { alignSelf: 'flex-start' }]} // Align the box to the left
+  onPress={() => {
+    if (questions[0] === item) {
+      navigation.navigate("GeneralChat", { isNewChat: false });
+    }
+  }}
+>
       <View style={{ width: '90%', alignItems: 'flex-start', flexDirection: 'column' }}>
         <Text
           style={[
@@ -288,17 +286,19 @@ export default function HomeScreen({ navigation, changes }) {
       </View>
 
       <View style={styles.messageInputContainer}>
-        <TextInput
-          style={styles.messageInput}
-          placeholder="Write your message..."
-          onFocus={() => navigation.navigate("GeneralChat")}
-        />
-        <TouchableOpacity
-          style={styles.sendButton}
-          onPress={() => navigation.navigate("GeneralChat")}
-        >
-          <MaterialIcons name="send" size={24} color="#FFF" />
-        </TouchableOpacity>
+      <TextInput
+  style={styles.messageInput}
+  placeholder="Write your message..."
+  onFocus={() => navigation.navigate("GeneralChat", { isNewChat: true })}
+/>
+
+<TouchableOpacity
+  style={styles.sendButton}
+  onPress={() => navigation.navigate("GeneralChat", { isNewChat: true })}
+>
+  <MaterialIcons name="send" size={24} color="#FFF" />
+</TouchableOpacity>
+
       </View>
     </View>
   );
