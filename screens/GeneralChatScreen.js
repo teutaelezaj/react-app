@@ -231,31 +231,28 @@ AsyncStorage.setItem("conversationHistory", JSON.stringify(messages.concat({ typ
             keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
             style={{ flex: 1 }}
           >
-        <ScrollView
-          ref={scrollViewRef}
-          onContentSizeChange={() =>
-            scrollViewRef.current.scrollToEnd({ animated: true })
-          }
-          style={styles.chatArea}
-          contentContainerStyle={{
-            paddingTop: 10, // Add this line to set the padding top of the ScrollView
-            paddingBottom: 100,
-            flexGrow: 1,
-            justifyContent: "flex-start",
-          }}
-        >
-{/* {messages.map((message, index) => renderMessage(message, index, true))} */}
-{isInitialized && messages.map((message, index) => renderMessage(message, index, true))}
-{isBotTyping && messages.length > 0 && (
-  renderMessage(
-    { type: "bot", content: botTypingText },
-    messages.length,
-    isBotTyping
-  )
-)}
+<ScrollView
+  ref={scrollViewRef}
+  onContentSizeChange={(contentWidth, contentHeight) => scrollViewRef.current.scrollTo({ x: 0, y: contentHeight, animated: true })}
+  style={styles.chatArea}
+  contentContainerStyle={{
+    paddingTop: 10,
+    paddingBottom: Platform.OS === "ios" ? 130 : 160, // Increase paddingBottom for both platforms
+    flexGrow: 1,
+    justifyContent: "flex-start",
+  }}
+>
 
-    
-        </ScrollView>
+  {isInitialized && messages.map((message, index) => renderMessage(message, index, true))}
+  {isBotTyping && messages.length > 0 && (
+    renderMessage(
+      { type: "bot", content: botTypingText },
+      messages.length,
+      isBotTyping
+    )
+  )}
+</ScrollView>
+
     
             <StatusBar style="auto" />
             <View style={styles.inputArea}>
@@ -336,7 +333,7 @@ const styles = StyleSheet.create({
     paddingRight: 40,
     borderRadius: 10,
     marginVertical: 5,
-    // minHeight: 80,
+    minHeight: 80,
   },
   chatAreaContent: {
     padding: 10,
@@ -447,7 +444,7 @@ const styles = StyleSheet.create({
     paddingRight: 40,
     borderRadius: 10,
     marginVertical: 5,
-    minHeight: 80,
+    minHeight: 40,
   },
   historyMessageContainer: {
     alignSelf: "stretch",
