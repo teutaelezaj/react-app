@@ -86,7 +86,7 @@ const subcategoryScreens = {
 export default function HomeScreen({ navigation, changes }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [questions, setQuestions] = useState([]);
-  console.log("Message", questions);
+  // console.log("Message", questions);
   useFocusEffect(
     React.useCallback(() => {
       AsyncStorage.getItem("conversationHistory")
@@ -201,7 +201,7 @@ export default function HomeScreen({ navigation, changes }) {
     marginTop: 20, // Add marginTop
   }}
 >
-  <Text style={[styles.suggestionsText, { marginTop: 5, marginBottom: 0 }]}>Chat History</Text>
+  <Text style={[styles.suggestionsText, { marginTop: 5, marginBottom: 0 }]}>My History</Text>
   {/* <Text
     style={[styles.historyTextStyle, { fontSize: 15, color: "#B2ABAB" }]}
   >

@@ -13,6 +13,7 @@ import {
   Ionicons,
 } from "@expo/vector-icons";
 import { InAppReview } from "react-native-in-app-review";
+import { Linking, Platform } from 'react-native';
 const SettingsScreen = () => {
   const navigation = useNavigation();
   const [isReviewAvailable, setIsReviewAvailable] = useState(false);
@@ -50,7 +51,7 @@ const SettingsScreen = () => {
         </View>
       </View>
       <View style={styles.boxView}>
-        <View style={styles.subView}>
+        {/* <View style={styles.subView}>
           <FontAwesome
             name="twitter-square"
             size={20}
@@ -60,8 +61,8 @@ const SettingsScreen = () => {
           <TouchableOpacity onPress={() => navigation.navigate("SettingsInfo")}>
             <Text style={styles.option}>Follow Us on Twitter</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.dividerView} />
+        </View> */}
+        {/* <View style={styles.dividerView} />
         <View style={styles.subView}>
           <FontAwesome
             name="reddit-square"
@@ -75,8 +76,8 @@ const SettingsScreen = () => {
           >
             <Text style={styles.option}>Follow Us on Reddit</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.dividerView} />
+        </View> */}
+        {/* <View style={styles.dividerView} /> */}
         <View style={styles.subView}>
           <AntDesign
             name="star"
@@ -109,18 +110,24 @@ const SettingsScreen = () => {
       </View>
 
       <View style={styles.boxView}>
-        <View style={styles.subView}>
-          <MaterialIcons
-            name="email"
-            size={20}
-            color="white"
-            style={styles.iconStyle}
-          />
-          <TouchableOpacity onPress={() => navigation.navigate("SettingsInfo")}>
-            <Text style={styles.option}>Email Support</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.dividerView} />
+      <View style={styles.subView}>
+  <MaterialIcons
+    name="email"
+    size={20}
+    color="white"
+    style={styles.iconStyle}
+  />
+  <TouchableOpacity onPress={() => {
+    if (Platform.OS === 'web') {
+      window.open('mailto:teutaelezaj101@gmail.com', '_blank');
+    } else {
+      Linking.openURL('mailto:teutaelezaj101@gmail.com');
+    }
+  }}>
+    <Text style={styles.option}>Email Support</Text>
+  </TouchableOpacity>
+</View>
+        {/* <View style={styles.dividerView} />
         <View style={styles.subView}>
           <FontAwesome
             name="refresh"
@@ -133,7 +140,7 @@ const SettingsScreen = () => {
           >
             <Text style={styles.option}>Restored Purchase</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
       <View style={styles.boxView}>
         <View style={styles.subView}>
