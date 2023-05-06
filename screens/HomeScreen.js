@@ -86,7 +86,22 @@ const subcategoryScreens = {
 export default function HomeScreen({ navigation, changes }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [questions, setQuestions] = useState([]);
+  const [conversationHistories, setConversationHistories] = useState([]);
+
   // console.log("Message", questions);
+
+  const fetchConversationHistories = async () => {
+    try {
+      const historiesJson = await AsyncStorage.getItem("conversationHistories");
+      if (historiesJson) {
+        setConversationHistories(JSON.parse(historiesJson));
+      }
+    } catch (error) {
+      console.log("Error fetching conversation histories:", error);
+    }
+  };
+
+  
   useFocusEffect(
     React.useCallback(() => {
       const loadHistory = async () => {
@@ -100,9 +115,25 @@ export default function HomeScreen({ navigation, changes }) {
       };
   
       loadHistory();
+      fetchConversationHistories();
     }, [])
   );
 
+  const renderConversationHistories = () => {
+    return conversationHistories.map((history, historyIndex) => {
+      return (
+        <View key={historyIndex}>
+          {history.map((message, messageIndex) => (
+            <Text key={`${historyIndex}-${messageIndex}`}>
+              {message.type}: {message.content}
+            </Text>
+          ))}
+        </View>
+      );
+    });
+  };
+  
+  
 
   const renderQuestion = ({ item, index }) => (
 <TouchableOpacity
@@ -183,80 +214,121 @@ export default function HomeScreen({ navigation, changes }) {
   return (
     <View style={styles.container}>
       <Text style={styles.suggestionsText}>Meet Nexus</Text>
-      <Text style={styles.subtitleText}>
-  Chat with Nexus, an AI chat bot designed by Chatto to assist you with
-  anything you need!
-</Text>
-<View style={{ height: 10 }} />
-<View
-  style={{
-    fontSize: 2,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 15, // Reduce marginBottom
-    alignSelf: "flex-start",
-    // marginLeft: 20,
-    marginTop: 20, // Add marginTop
-  }}
->
-  <Text style={[styles.suggestionsText, { marginTop: 5, marginBottom: 0 }]}>My History</Text>
-  {/* <Text
-    style={[styles.historyTextStyle, { fontSize: 15, color: "#B2ABAB" }]}
-  >
-    See All
-  </Text> */}
-</View>
+      <ScrollView>
+      <Text style={
+        styles.subtitleText
+         // Reduce marginBottom from 30 to 10
+      }>
+        Chat with Nexus, an AI chat bot designed by Chatto to assist you with
+        anything you need!
+      </Text>
+      {/* <View style={{ height: 10 }} /> */}
+  
+  
+      {/* History Section */}
+     
+      <View style={{ alignSelf: "flex-start"}}>
+        <Text style={[styles.suggestionsText, { marginTop: 10, marginBottom: 5 }]}>
+          My History
+        </Text>
+        <FlatList
+          data={conversationHistories}
+          renderItem={({ item: history, index: historyIndex }) => (
+            <TouchableOpacity
+              key={historyIndex}
+              style={[
+                styles.categoryBox,
+                { alignSelf: "flex-start", marginBottom: 10 },
+              ]}
+              onPress={() =>
+                navigation.navigate("GeneralChat", {
+                  isNewChat: false,
+                  historyIndex,
+                })
+              }
+            >
+              <View
+                style={{
+                  width: "90%",
+                  alignItems: "flex-start",
+                  flexDirection: "column",
+                }}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    {
+                      fontWeight: "bold",
+                      fontSize: 16,
+                      color: "white",
+                      marginBottom: 5,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {`Conversation ${historyIndex + 1}`}
+                </Text>
+                <Text
+                  style={[
+                    styles.categoryText,
+                    {
+                      fontSize: 14,
+                      color: "white",
+                      fontWeight: "normal",
+                      marginTop: 5,
+                    },
+                  ]}
+                >
+                  See your recent conversation
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+          horizontal
+          style={{
+            alignSelf: "center",
+            paddingHorizontal: "5%",
+          }}
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+  
+
+      <View style={{ height: 0 }} />
 
 
-
-      {questions.length > 0 ? (
-  <View>
-    <FlatList
-      data={questions}
-      renderItem={renderQuestion}
-      keyExtractor={(item, index) => index.toString()}
-      horizontal
-      style={{
-        alignSelf: "center",
-        paddingHorizontal: "5%",
-      }}
-      showsHorizontalScrollIndicator={false}
-    />
-  </View>
-) : (
-  <Text style={{ paddingHorizontal: '5%', fontSize: 16, color: '#7C7C7C' }}>
-    You currently have no chat histories. Chat away and have your history saved here!
-  </Text>
-)}
-
-
-      <Text style={styles.suggestionsText}>Suggestions</Text>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoriesScrollView}
-      >
-        {suggestionsData.map((suggestion, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.categoryButton,
-              {
-                backgroundColor:
-                  selectedCategory === suggestion.category
-                    ? "#5E17EB"
-                    : "#272521",
-              },
-            ]}
-            onPress={() => handleCategoryPress(suggestion.category)}
-          >
-            <Text style={styles.categoryButtonText}>
-              {suggestion.emoji} {suggestion.category}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {/* Suggestions */}
+      <View style={[styles.suggestionsAndSubcategoriesContainer, {marginTop: selectedCategory ? -90 : 0}]}>
+      <View style={{ marginTop: -99}}>
+        <Text style={styles.suggestionsText}>Suggestions</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoriesScrollView}
+        >
+          {suggestionsData.map((suggestion, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.categoryButton,
+                {
+                  backgroundColor:
+                    selectedCategory === suggestion.category
+                      ? "#5E17EB"
+                      : "#272521",
+                },
+              ]}
+              onPress={() => handleCategoryPress(suggestion.category)}
+            >
+              <Text style={styles.categoryButtonText}>
+                {suggestion.emoji} {suggestion.category}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+      
 
       <View style={styles.mainContent}>
         <FlatList
@@ -281,24 +353,25 @@ export default function HomeScreen({ navigation, changes }) {
           )}
           keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.subcategoriesContent}
-          ListEmptyComponent={<View style={{ flex: 1 }} />} // Add this line
+          ListEmptyComponent={<View style={{ flex: 1 }} />}
         />
       </View>
+      </View>
+      </ScrollView>
 
       <View style={styles.messageInputContainer}>
-      <TextInput
-  style={styles.messageInput}
-  placeholder="Write your message..."
-  onFocus={() => navigation.navigate("GeneralChat", { isNewChat: true })}
-/>
+        <TextInput
+          style={styles.messageInput}
+          placeholder="Write your message..."
+          onFocus={() => navigation.navigate("GeneralChat", { isNewChat: true })}
+        />
 
-<TouchableOpacity
-  style={styles.sendButton}
-  onPress={() => navigation.navigate("GeneralChat", { isNewChat: true })}
->
-  <MaterialIcons name="send" size={24} color="#FFF" />
-</TouchableOpacity>
-
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={() => navigation.navigate("GeneralChat", { isNewChat: true })}
+        >
+          <MaterialIcons name="send" size={24} color="#FFF" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -309,12 +382,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000000",
-    paddingTop: 20, // Add padding to move content down
+    paddingTop: 10, // Add padding to move content down
   },
   mainContent: {
     flexGrow: 1,
     width: "100%",
     paddingHorizontal: 20,
+    marginTop: 20, // Add marginTop
   },
 
   boxView: {
@@ -362,12 +436,12 @@ const styles = StyleSheet.create({
     marginBottom: 15, // Reduce marginBottom
     alignSelf: "flex-start",
     marginLeft: 20,
-    marginTop: 20, // Add marginTop
+    marginTop: 8, // Add marginTop
   },
   categoriesScrollView: {
     flexDirection: "row",
-    maxHeight: 60, // Adjust this value to set the height of the categoriesScrollView
-    marginBottom: 10, // Add marginBottom
+    maxHeight: 60,
+    marginBottom: 10, // Add marginBottom to give some space between the categories and subcategories
   },
   subcategoriesScrollView: {
     flex: 1,
@@ -376,7 +450,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     paddingHorizontal: 20,
     width: screenWidth,
-    marginTop: 10,
+    marginTop: 0,
     alignItems: "center", // Add this line
     justifyContent: "center", // Add this line
   },
@@ -405,7 +479,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     paddingHorizontal: 20,
     width: screenWidth,
-    marginTop: 10,
+    marginTop: 0,
   },
 
   subcategoryButton: {
@@ -445,7 +519,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    // borderColor: "#B2ABAB",
     justifyContent: "space-between",
     backgroundColor: "#000000",
     paddingHorizontal: 20,
@@ -453,7 +526,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     height: 80,
     width: screenWidth,
-    alignSelf: "center", // Add this line
+    alignSelf: "center", // Add alignSelf to center the message input container horizontally
   },
   messageInput: {
     backgroundColor: "#fff",
@@ -476,10 +549,11 @@ const styles = StyleSheet.create({
   },
   subcategoriesContent: {
     flexGrow: 1,
-    paddingBottom: 5, // Reduce paddingBottom
+    paddingBottom: 5, // Add paddingBottom to provide some padding at the bottom of the subcategories list
   },
   historySection: {
-    marginTop: 20, // Add marginTop to create more spacing between Meet Nexus and My History
+    marginTop: 0, // Add marginTop to create more spacing between Meet Nexus and My History
+    // marginBottom: 100,
   },
 
   emptyHistoryText: {
@@ -489,13 +563,18 @@ const styles = StyleSheet.create({
     marginTop: 10, // Add marginTop for the empty history message
   },
   categoryBox: {
-      width: '80%', // Set the width to 100%
-      height: 100, // Decrease the height to 60
-      borderRadius: 17,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginVertical: 10,
-      paddingHorizontal: 10, // Add some padding to the sides
-    backgroundColor: "#272521", // Set the background color to light grey
+    width: 230, // Set the width to 80%
+    height: 120, // Set the height to 100
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#272521",
+    marginRight: 15, // Add spacing between the boxes
   },
+  suggestionsAndSubcategoriesContainer: {
+    marginTop: 0,
+  },
+  
 });
