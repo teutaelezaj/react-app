@@ -8,8 +8,10 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Keyboard,
   ActivityIndicator,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { Dimensions } from "react-native";
@@ -36,8 +38,29 @@ export default function GeneralChatScreen({ navigation, route }) {
   const [isNewMessage, setIsNewMessage] = useState(true);
   const [inputAreaHeight, setInputAreaHeight] = useState(90);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const conversationHistories = route.params?.conversationHistories || [];
+  
+
 
   const scrollViewRef = useRef(null);
+
+  React.useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
+  
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+  
 
   const handleClearText = () => {
     setInputText("");
@@ -46,21 +69,29 @@ export default function GeneralChatScreen({ navigation, route }) {
     React.useCallback(() => {
       const loadHistory = async () => {
         const isNewChat = route.params?.isNewChat ?? true;
-        const history = await AsyncStorage.getItem("conversationHistory");
-  
-        if (!isNewChat && history && history.trim().startsWith("[")) {
-          setMessages(JSON.parse(history));
+        const conversationIndex = route.params?.conversationIndex ?? null;
+        const histories = await AsyncStorage.getItem("conversationHistories");
+      
+        if (!isNewChat && histories && histories.trim().startsWith("[")) {
+          const conversationHistory = JSON.parse(histories)[conversationIndex];
+          if (conversationHistory) {
+            setMessages(conversationHistory);
+          } else {
+            setMessages([]);
+          }
         } else {
-          setMessages([]);
+          setMessages([]); // Initialize with an empty array
         }
+      
         setIsInitialized(true);
       };
+      
+      
   
       const unsubscribe = navigation.addListener("blur", () => {
         // Clear the messages state when the screen is unfocused
         setMessages([]);
       });
-  
       // Load the history when the screen is focused
       loadHistory();
   
@@ -91,6 +122,24 @@ export default function GeneralChatScreen({ navigation, route }) {
     });
   };
 
+
+  const [conversation, setConversation] = useState(
+    route.params?.history || []
+  );
+
+  const saveConversation = async () => {
+    try {
+      const newHistory = [...conversationHistories, conversation];
+      await AsyncStorage.setItem(
+        "conversationHistories",
+        JSON.stringify(newHistory)
+      );
+    } catch (error) {
+      console.log("Error saving conversation:", error);
+    }
+  };
+  
+  
   const handleInputChange = (text) => {
     setInputText(text);
   };
@@ -113,6 +162,7 @@ export default function GeneralChatScreen({ navigation, route }) {
       ...prevMessages,
       { type: "user", content: inputText },
     ]);
+    
 
     // Clear input text
     setInputText("");
@@ -171,26 +221,31 @@ export default function GeneralChatScreen({ navigation, route }) {
               ...prevMessages,
               { type: "bot", content: botResponse.trim() },
             ]);
+            
         
-            // Store conversation history in AsyncStorage
-            const newHistory = messages.concat({ type: "bot", content: botResponse.trim() });
-        
-            AsyncStorage.getItem("conversationHistories", (error, historiesJson) => {
-              let histories = [];
-        
-              if (historiesJson) {
-                histories = JSON.parse(historiesJson);
-              }
-        
-              histories.push(newHistory);
-        
-              AsyncStorage.setItem("conversationHistories", JSON.stringify(histories));
-            });
-        
-            console.log(
-              "Conversation history111111111111111111",
-              conversationHistory
-            );
+// Update the conversation state before storing it
+setConversation((prevConversation) => {
+  const updatedConversation = [
+    ...prevConversation,
+    { type: "user", content: inputText },
+    { type: "bot", content: botResponse.trim() },
+  ];
+
+  // Store conversation history in AsyncStorage
+  AsyncStorage.getItem("conversationHistories", (error, historiesJson) => {
+    let histories = [];
+
+    if (historiesJson) {
+      histories = JSON.parse(historiesJson);
+    }
+
+    histories.push(updatedConversation);
+
+    AsyncStorage.setItem("conversationHistories", JSON.stringify(histories));
+  });
+
+  return updatedConversation;
+});
           }
         }, 50);
 
@@ -255,62 +310,72 @@ export default function GeneralChatScreen({ navigation, route }) {
   
   return (
     <View style={styles.container}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-            style={{ flex: 1 }}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            ref={scrollViewRef}
+            onContentSizeChange={(contentWidth, contentHeight) =>
+              scrollViewRef.current.scrollTo({
+                x: 0,
+                y: contentHeight,
+                animated: true,
+              })
+            }
+            style={styles.chatArea}
+            contentContainerStyle={{
+              paddingTop: 10,
+              paddingBottom: Platform.OS === "ios" ? 130 : 160,
+              flexGrow: 1,
+              justifyContent: "flex-start",
+            }}
           >
-            
-<ScrollView
-  ref={scrollViewRef}
-  onContentSizeChange={(contentWidth, contentHeight) => scrollViewRef.current.scrollTo({ x: 0, y: contentHeight, animated: true })}
-  style={styles.chatArea}
-  contentContainerStyle={{
-    paddingTop: 10,
-    paddingBottom: Platform.OS === "ios" ? 130 : 160, // Increase paddingBottom for both platforms
-    flexGrow: 1,
-    justifyContent: "flex-start",
-  }}
->
-
-  {isInitialized && messages.map((message, index) => renderMessage(message, index, true))}
-  {isBotTyping && messages.length > 0 && (
-    renderMessage(
-      { type: "bot", content: botTypingText },
-      messages.length,
-      isBotTyping
-    )
-  )}
-</ScrollView>
-
-            <StatusBar style="auto" />
-            <View style={styles.inputArea}>
-              <TextInput
-                style={styles.input}
-                placeholder="Type your message here"
-                placeholderTextColor="#f5f5f5"
-                onChangeText={handleInputChange}
-                value={inputText}
-                multiline={true}
-                maxHeight={200}
-              />
-              <TouchableOpacity
-                style={styles.clearButton}
-                onPress={handleClearText}
-              >
-                <Text style={styles.clearButtonText}>×</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleChatbotResponse}
-              >
-                <Text style={styles.buttonText}>Send</Text>
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
+            {isInitialized &&
+              messages.map((message, index) =>
+                renderMessage(message, index, true)
+              )}
+            {isBotTyping && messages.length > 0 && (
+              renderMessage(
+                { type: "bot", content: botTypingText },
+                messages.length,
+                isBotTyping
+              )
+            )}
+          </ScrollView>
+        </TouchableWithoutFeedback>
+        <StatusBar style="auto" />
+        <View style={styles.inputArea}>
+          <TextInput
+            style={styles.input}
+            placeholder="Type your message here"
+            placeholderTextColor="#f5f5f5"
+            onChangeText={handleInputChange}
+            value={inputText}
+            multiline={true}
+            maxHeight={200}
+          />
+          {keyboardVisible && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={handleClearText}
+            >
+              <Text style={styles.clearButtonText}>×</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleChatbotResponse}
+          >
+            <Text style={styles.buttonText}>Send</Text>
+          </TouchableOpacity>
         </View>
-      );
-    }
+      </KeyboardAvoidingView>
+    </View>
+  );
+          }  
 
 const styles = StyleSheet.create({
   container: {
@@ -358,7 +423,7 @@ const styles = StyleSheet.create({
   botMessageContainer: {
     flexDirection: "row",
     alignItems: "flex-start", // Change from center to flex-start
-    backgroundColor: "rgba(128, 0, 128, 0.6)",
+    backgroundColor: "rgba(94, 23, 235, 0.7)",
     alignSelf: "stretch",
     paddingTop: 20,
     paddingBottom: 20,
@@ -495,7 +560,7 @@ const styles = StyleSheet.create({
   messageIcon: {
     position: "absolute",
     top: 3,
-    left: 0,
+    left: -5,
     paddingTop: 25, // Add some padding to give the icon some space from the top
     paddingLeft: 23, // Add some padding to give the icon some space from the left
   },

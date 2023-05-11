@@ -84,8 +84,8 @@ const subcategoryScreens = {
 };
 
 export default function HomeScreen({ navigation, changes }) {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [questions, setQuestions] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("Fun");
+  const [questions, setQuestions] = useState([""]);
   const [conversationHistories, setConversationHistories] = useState([]);
 
   // console.log("Message", questions);
@@ -101,6 +101,7 @@ export default function HomeScreen({ navigation, changes }) {
     }
   };
 
+  
   
   useFocusEffect(
     React.useCallback(() => {
@@ -120,21 +121,47 @@ export default function HomeScreen({ navigation, changes }) {
   );
 
   const renderConversationHistories = () => {
-    return conversationHistories.map((history, historyIndex) => {
+    if (conversationHistories.length === 0) {
       return (
-        <View key={historyIndex}>
-          {history.map((message, messageIndex) => (
-            <Text key={`${historyIndex}-${messageIndex}`}>
-              {message.type}: {message.content}
-            </Text>
-          ))}
+        <View style={styles.emptyMessageContainer}>
+          <Text style={styles.emptyMessageText}>
+            empty! try talking to nexus
+          </Text>
         </View>
       );
-    });
+    }
+    return conversationHistories.map((history, historyIndex) => (
+      <TouchableOpacity
+        key={historyIndex}
+        style={styles.historySquare}
+        onPress={() => {
+          if (questions[0] === item) {
+            navigation.navigate("GeneralChat", {
+              history: [],
+              isNewChat: true,
+              conversationHistories: conversationHistories,
+            });
+          }
+        }}
+      >
+        <Text style={styles.historyTitle}>
+          {history[0]?.content || "No title"}
+        </Text>
+      </TouchableOpacity>
+    ));
+  };
+
+  const clearChatHistory = async () => {
+    try {
+      await AsyncStorage.setItem("conversationHistories", JSON.stringify([]));
+      console.log("Chat history cleared.");
+      setConversationHistories([]); 
+    } catch (error) {
+      console.log("Error clearing chat history:", error);
+    }
   };
   
   
-
   const renderQuestion = ({ item, index }) => (
 <TouchableOpacity
   style={[styles.categoryBox, { alignSelf: 'flex-start' }]} // Align the box to the left
@@ -191,7 +218,7 @@ export default function HomeScreen({ navigation, changes }) {
             style={{ marginRight: 15 }}
             onPress={() => Linking.openURL("https://www.google.com")}
           >
-            <FontAwesome5 name="discord" size={24} color="white" />
+            <FontAwesome5 name="discord" size={24} color="rgb(94, 23, 235)" />
           </TouchableOpacity>
           <TouchableOpacity
             style={{ marginRight: 15 }}
@@ -228,25 +255,42 @@ export default function HomeScreen({ navigation, changes }) {
       {/* History Section */}
      
       <View style={{ alignSelf: "flex-start"}}>
-        <Text style={[styles.suggestionsText, { marginTop: 10, marginBottom: 5 }]}>
+        <Text style={[styles.suggestionsText, { marginTop: 20, marginBottom: 5 }]}>
           My History
         </Text>
+          
+        <TouchableOpacity
+  onPress={clearChatHistory}
+  style={{
+    backgroundColor: 'blue', // Change the color to something that stands out
+    padding: 10,
+    borderRadius: 5,
+    alignSelf: 'center', // Center the button
+    marginBottom: 20, // Add some margin to separate the button from other components
+  }}
+>
+  <Text style={{ color: 'white' }}>Clear Chat History</Text>
+</TouchableOpacity>
+
         <FlatList
-          data={conversationHistories}
-          renderItem={({ item: history, index: historyIndex }) => (
-            <TouchableOpacity
-              key={historyIndex}
-              style={[
-                styles.categoryBox,
-                { alignSelf: "flex-start", marginBottom: 10 },
-              ]}
-              onPress={() =>
-                navigation.navigate("GeneralChat", {
-                  isNewChat: false,
-                  historyIndex,
-                })
-              }
-            >
+data={conversationHistories.reverse()}
+renderItem={({ item: history, index: historyIndex }) => (
+  
+<TouchableOpacity
+  key={historyIndex}
+  style={[
+    styles.categoryBox,
+    { alignSelf: "flex-start", marginBottom: 10 },
+  ]}
+  onPress={() => {
+    navigation.navigate("GeneralChat", {
+      isNewChat: false,
+      conversation: history,
+      conversationIndex: historyIndex,
+    });
+  }}
+>
+
               <View
                 style={{
                   width: "90%",
@@ -300,7 +344,7 @@ export default function HomeScreen({ navigation, changes }) {
 
       {/* Suggestions */}
       <View style={[styles.suggestionsAndSubcategoriesContainer, {marginTop: selectedCategory ? -90 : 0}]}>
-      <View style={{ marginTop: -99}}>
+      <View style={{ marginTop: -100}}>
         <Text style={styles.suggestionsText}>Suggestions</Text>
         <ScrollView
           horizontal
@@ -331,6 +375,15 @@ export default function HomeScreen({ navigation, changes }) {
       
 
       <View style={styles.mainContent}>
+      {/* <View style={{ transform: [{ translateY: selectedCategory ? -20 : 0 }] }}> */}
+      <View style={{
+    transform: [
+      { translateY: selectedCategory ? -10 : 90 },
+      { scaleY: selectedCategory ? 1 : 0 },
+    ],
+    opacity: selectedCategory ? 1 : 0,
+  }}>
+
         <FlatList
           data={
             selectedCategory
@@ -355,6 +408,7 @@ export default function HomeScreen({ navigation, changes }) {
           contentContainerStyle={styles.subcategoriesContent}
           ListEmptyComponent={<View style={{ flex: 1 }} />}
         />
+      </View>
       </View>
       </View>
       </ScrollView>
@@ -576,5 +630,15 @@ const styles = StyleSheet.create({
   suggestionsAndSubcategoriesContainer: {
     marginTop: 0,
   },
-  
+  emptyMessageContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyMessageText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#5E17EB", // You can use any color you prefer
+  }
+
 });
