@@ -232,17 +232,20 @@ setConversation((prevConversation) => {
   ];
 
   // Store conversation history in AsyncStorage
-  AsyncStorage.getItem("conversationHistories", (error, historiesJson) => {
-    let histories = [];
-
-    if (historiesJson) {
-      histories = JSON.parse(historiesJson);
-    }
-
+// Store conversation history in AsyncStorage
+const saveConversationHistory = async (updatedConversation) => {
+  try {
+    const historiesJson = await AsyncStorage.getItem("conversationHistories");
+    let histories = historiesJson ? JSON.parse(historiesJson) : [];
     histories.push(updatedConversation);
+    await AsyncStorage.setItem("conversationHistories", JSON.stringify(histories));
+  } catch (error) {
+    console.log(error);
+  }
+}
 
-    AsyncStorage.setItem("conversationHistories", JSON.stringify(histories));
-  });
+saveConversationHistory(updatedConversation);
+
 
   return updatedConversation;
 });
@@ -373,6 +376,7 @@ setConversation((prevConversation) => {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      
     </View>
   );
           }  

@@ -87,21 +87,28 @@ export default function HomeScreen({ navigation, changes }) {
   const [selectedCategory, setSelectedCategory] = useState("Fun");
   const [questions, setQuestions] = useState([""]);
   const [conversationHistories, setConversationHistories] = useState([]);
+  
 
   // console.log("Message", questions);
 
-  const fetchConversationHistories = async () => {
-    try {
-      const historiesJson = await AsyncStorage.getItem("conversationHistories");
-      if (historiesJson) {
-        setConversationHistories(JSON.parse(historiesJson));
-      }
-    } catch (error) {
-      console.log("Error fetching conversation histories:", error);
+// This is your fetchConversationHistories function
+const fetchConversationHistories = async () => {
+  try {
+    const historiesJson = await AsyncStorage.getItem("conversationHistories");
+    if (historiesJson) {
+      const historiesArray = JSON.parse(historiesJson);
+      setConversationHistories(historiesArray.reverse()); // reverse only once
     }
-  };
+  } catch (error) {
+    console.log("Error fetching conversation histories:", error);
+  }
+};
 
-  
+// This is the useEffect hook that listens to changes in conversationHistories
+React.useEffect(() => {
+  console.log("Reversed Histories:", conversationHistories);
+}, [conversationHistories]);
+
   
   useFocusEffect(
     React.useCallback(() => {
@@ -117,9 +124,9 @@ export default function HomeScreen({ navigation, changes }) {
   
       loadHistory();
       fetchConversationHistories();
-    }, [])
+    }, [changes])
   );
-
+  
   const renderConversationHistories = () => {
     if (conversationHistories.length === 0) {
       return (
@@ -238,6 +245,9 @@ export default function HomeScreen({ navigation, changes }) {
 
   const historyData = [];
 
+  console.log("Rendering Histories:", conversationHistories);
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.suggestionsText}>Meet Nexus</Text>
@@ -273,7 +283,8 @@ export default function HomeScreen({ navigation, changes }) {
 </TouchableOpacity>
 
         <FlatList
-data={conversationHistories.reverse()}
+data={conversationHistories}
+extraData={conversationHistories}
 renderItem={({ item: history, index: historyIndex }) => (
   
 <TouchableOpacity
