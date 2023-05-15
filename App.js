@@ -14,6 +14,7 @@ import SettingsInfo from "./screens/SettingsInfo";
 import TermsOfService from "./screens/TermsOfService";
 import ChatRules from "./screens/ChatRules";
 import LoadingScreen from "./screens/LoadingScreen";
+import AboutChatto from "./screens/AboutChatto";
 
 import NutritionScreen from "./screens/NutritionScreen";
 import DreamScreen from "./screens/DreamScreen";
@@ -407,6 +408,22 @@ export default function App() {
           component={ChatRules}
           options={{
             title: "ChatRules",
+            headerStyle: {
+              backgroundColor: "black",
+            },
+            headerTitleStyle: {
+              alignSelf: "center",
+            },
+
+            headerTitleAlign: "center",
+            headerTintColor: "white",
+          }}
+        />
+                <Stack.Screen
+          name="AboutChatto"
+          component={AboutChatto}
+          options={{
+            title: "AboutChatto",
             headerStyle: {
               backgroundColor: "black",
             },

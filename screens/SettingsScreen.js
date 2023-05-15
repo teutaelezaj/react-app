@@ -1,7 +1,7 @@
 /** @format */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   Feather,
@@ -102,7 +102,7 @@ const SettingsScreen = () => {
           />
           <TouchableOpacity
             // style={styles.boxView}
-            onPress={() => navigation.navigate("ChatRules")}
+            onPress={() => navigation.navigate("AboutChatto")}
           >
             <Text style={styles.option}>About Chatto</Text>
           </TouchableOpacity>
@@ -117,30 +117,35 @@ const SettingsScreen = () => {
     color="white"
     style={styles.iconStyle}
   />
-  <TouchableOpacity onPress={() => {
-    if (Platform.OS === 'web') {
-      window.open('mailto:teutaelezaj101@gmail.com', '_blank');
+<TouchableOpacity onPress={async () => {
+  const email = 'chatto@gmail.com';
+  const url = `mailto:${email}`;
+
+  if (Platform.OS === 'web') {
+    window.open(url, '_blank');
+  } else {
+    const supported = await Linking.canOpenURL(url);
+
+    if (!supported) {
+      // If device can't handle mailto: scheme, show a message
+      Alert.alert(
+        "Email Not Supported",
+        "Please manually send an email to: " + email,
+        [{ text: "OK" }]
+      );
     } else {
-      Linking.openURL('mailto:teutaelezaj101@gmail.com');
+      try {
+        await Linking.openURL(url);
+      } catch (error) {
+        Alert.alert("An error occurred", "Please try again later", [{ text: "OK" }]);
+      }
     }
-  }}>
-    <Text style={styles.option}>Email Support</Text>
-  </TouchableOpacity>
+  }
+}}>
+  <Text style={styles.option}>Email Support</Text>
+</TouchableOpacity>
+
 </View>
-        {/* <View style={styles.dividerView} />
-        <View style={styles.subView}>
-          <FontAwesome
-            name="refresh"
-            size={20}
-            color="white"
-            style={[styles.iconStyle, { fontWeight: "bold" }]}
-          />
-          <TouchableOpacity
-            onPress={() => navigation.navigate("TermsOfService")}
-          >
-            <Text style={styles.option}>Restored Purchase</Text>
-          </TouchableOpacity>
-        </View> */}
       </View>
       <View style={styles.boxView}>
         <View style={styles.subView}>
