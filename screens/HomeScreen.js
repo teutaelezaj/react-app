@@ -250,8 +250,8 @@ React.useEffect(() => {
 
   return (
     <View style={styles.container}>
+            <ScrollView>
       <Text style={styles.suggestionsText}>Meet Nexus</Text>
-      <ScrollView>
       <Text style={
         styles.subtitleText
          // Reduce marginBottom from 30 to 10

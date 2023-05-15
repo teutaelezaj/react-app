@@ -19,7 +19,7 @@ import { Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/FontAwesome';
-const OPENAI_API_KEY = "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";
+const OPENAI_API_KEY = " ";
 const API_URL = "https://api.openai.com/v1/completions";
 
 const windowWidth = Dimensions.get("window").width;

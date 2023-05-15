@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
-const OPENAI_API_KEY = "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";
+const OPENAI_API_KEY = " ";
 const API_URL = "https://api.openai.com/v1/completions";
 
 export default function FitnessScreen({ navigation }) {
